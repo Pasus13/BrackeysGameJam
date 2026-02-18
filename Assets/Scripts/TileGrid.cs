@@ -21,6 +21,9 @@ public class TileGrid : MonoBehaviour
     [SerializeField] private Material triggerMaterial;
     [SerializeField] private Material doorMaterial;
     
+    public delegate void TilesInstantiatedHandler();
+    public event TilesInstantiatedHandler OnTilesInstantiated;
+    
     private Dictionary<Vector2Int, GameObject> tiles = new Dictionary<Vector2Int, GameObject>();
 
     private void Start()
@@ -52,15 +55,29 @@ public class TileGrid : MonoBehaviour
             
             GameObject tileObject = Instantiate(tileInstance.tileData.prefab, worldPosition, rotation, transform);
             tileObject.name = $"Tile_{tileInstance.gridPosition.x}_{tileInstance.gridPosition.y}";
-            TileComponent tileComponent = tileObject.GetComponent<TileComponent>();
-            tileComponent.tileData = tileInstance.tileData;
-            tileComponent.gridPosition = tileInstance.gridPosition;
             
+            TileBase tileBase = tileObject.GetComponent<TileBase>();
+            if (tileBase != null)
+            {
+                tileBase.Initialize(tileInstance.tileData, tileInstance.gridPosition);
+            }
             
             ApplyMaterialToTile(tileObject, tileInstance.tileData.tileType);
             
+            if (tileInstance.tileData.tileType == TileType.Empty)
+            {
+                MeshRenderer renderer = tileObject.GetComponent<MeshRenderer>();
+                if (renderer != null)
+                {
+                    renderer.enabled = false;
+                }
+            }
+            
             tiles[tileInstance.gridPosition] = tileObject;
         }
+        
+        Debug.Log("[TileGrid] Tiles instantiation complete, notifying listeners");
+        OnTilesInstantiated?.Invoke();
     }
 
     public GameObject GetTile(Vector2Int gridPosition)
@@ -121,7 +138,7 @@ public class TileGrid : MonoBehaviour
         }
     }
 
-    private Vector3 GridToWorldPosition(Vector2Int gridPosition)
+    public Vector3 GridToWorldPosition(Vector2Int gridPosition)
     {
         return new Vector3(gridPosition.x * tileSpacing, 0, gridPosition.y * tileSpacing);
     }

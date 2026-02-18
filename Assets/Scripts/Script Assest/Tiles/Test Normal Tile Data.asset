@@ -16,3 +16,4 @@ MonoBehaviour:
   isLocked: 0
   isWalkable: 1
   prefab: {fileID: 2494740354578921905, guid: 9d1c5c0107a63814eaf7b142e27332f0, type: 3}
+  highlightColor: {r: 1, g: 1, b: 1, a: 1}

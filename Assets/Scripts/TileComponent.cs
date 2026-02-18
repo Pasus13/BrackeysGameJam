@@ -1,7 +1,6 @@
 using UnityEngine;
 
-public class TileComponent : MonoBehaviour
+public class TileComponent : TileBase
 {
-    public TileData tileData;
-    public Vector2Int gridPosition;
+    
 }
