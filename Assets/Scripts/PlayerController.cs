@@ -3,32 +3,37 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     public Camera currentCamera;
-    public TileGrid currentTileGrid;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    public TileSlideController slideController;
 
-    // Update is called once per frame
     void Update()
     {
         if (Input.GetMouseButtonDown(0))
         {
-            // Get mouse position
-            Vector3 mousePosition = Input.mousePosition;
-            Ray ray = currentCamera.ScreenPointToRay(mousePosition);
+            HandleTileClick();
+        }
 
+        if (Input.GetKeyDown(KeyCode.Z))
+        {
+            slideController.Undo();
+        }
+    }
 
-            bool somethingIsHit = Physics.Raycast(ray, out RaycastHit raycastHit);
+    private void HandleTileClick()
+    {
+        Vector3 mousePosition = Input.mousePosition;
+        Ray ray = currentCamera.ScreenPointToRay(mousePosition);
 
-            if (somethingIsHit)
+        bool somethingIsHit = Physics.Raycast(ray, out RaycastHit raycastHit);
+
+        if (somethingIsHit)
+        {
+            if (raycastHit.transform.TryGetComponent<TileComponent>(out var tileComponent))
             {
-                // Get tile component and try swapping
-                Debug.Log(raycastHit.transform.name);
-                if (raycastHit.transform.TryGetComponent<TileComponent>(out var tileComponent))
+                bool slideSuccess = slideController.TrySlide(tileComponent.gridPosition);
+                
+                if (slideSuccess)
                 {
-                    currentTileGrid.TrySwap(tileComponent.gridPosition);
+                    Debug.Log($"Tile slid from {tileComponent.gridPosition} to empty position");
                 }
             }
         }
