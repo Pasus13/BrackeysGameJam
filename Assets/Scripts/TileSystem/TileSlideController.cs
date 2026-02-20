@@ -4,13 +4,13 @@ using System.Collections.Generic;
 
 public class TileSlideController : MonoBehaviour
 {
-    [SerializeField] private TileGrid tileGrid;
     [SerializeField] private float slideDuration = 0.15f;
     [SerializeField] private int maxUndoSteps = 20;
 
     public delegate void TileMovedHandler(Vector2Int fromPosition, Vector2Int toPosition);
     public event TileMovedHandler OnTileMoved;
 
+    private TileGrid ActiveTileGrid => BoardManager.Instance?.ActiveBoard?.TileGrid;
     private List<Vector2Int> _emptyPositions = new List<Vector2Int>();
     private Stack<MoveRecord> _undoStack = new Stack<MoveRecord>();
     private bool _isAnimating = false;
@@ -23,42 +23,41 @@ public class TileSlideController : MonoBehaviour
 
     private void Start()
     {
-        if (tileGrid != null)
+        if (BoardManager.Instance != null)
         {
-            tileGrid.OnTilesInstantiated += FindAllEmptyPositions;
+            BoardManager.Instance.OnBoardChanged += OnBoardChanged;
         }
     }
 
     private void OnDestroy()
     {
-        if (tileGrid != null)
+        if (BoardManager.Instance != null)
         {
-            tileGrid.OnTilesInstantiated -= FindAllEmptyPositions;
+            BoardManager.Instance.OnBoardChanged -= OnBoardChanged;
         }
+    }
+
+    private void OnBoardChanged(int previousIndex, int newIndex)
+    {
+        FindAllEmptyPositions();
+        _undoStack.Clear();
     }
 
     public bool TrySlide(Vector2Int clickedTilePosition)
     {
-        if (_isAnimating)
+        if (_isAnimating || ActiveTileGrid == null)
         {
             return false;
         }
 
-        GameObject clickedTile = tileGrid.GetTile(clickedTilePosition);
-        if (clickedTile == null)
+        TileData clickedTileData = ActiveTileGrid.GetTileData(clickedTilePosition);
+        if (clickedTileData == null)
         {
             return false;
         }
 
-        TileComponent tileComponent = clickedTile.GetComponent<TileComponent>();
-        if (tileComponent == null || tileComponent.tileData == null)
+        if (!clickedTileData.IsMovable())
         {
-            return false;
-        }
-
-        if (!tileComponent.tileData.IsMovable())
-        {
-            Debug.Log($"[TileSlideController] Tile at {clickedTilePosition} is not movable (type: {tileComponent.tileData.tileType})");
             return false;
         }
 
@@ -77,47 +76,29 @@ public class TileSlideController : MonoBehaviour
 
     public bool TrySlideInDirection(Vector2Int tilePosition, Vector2Int direction)
     {
-        Debug.Log($"[TileSlideController] === TrySlideInDirection ===");
-        Debug.Log($"  Tile Position: {tilePosition}");
-        Debug.Log($"  Direction: {direction}");
-        Debug.Log($"  Empty Positions: {string.Join(", ", _emptyPositions)}");
-        
-        if (_isAnimating)
+        if (_isAnimating || ActiveTileGrid == null)
         {
-            Debug.Log($"  BLOCKED: Currently animating");
             return false;
         }
 
-        GameObject tile = tileGrid.GetTile(tilePosition);
-        if (tile == null)
+        TileData tileData = ActiveTileGrid.GetTileData(tilePosition);
+        if (tileData == null)
         {
-            Debug.Log($"  BLOCKED: Tile not found at {tilePosition}");
             return false;
         }
 
-        TileComponent tileComponent = tile.GetComponent<TileComponent>();
-        if (tileComponent == null || tileComponent.tileData == null)
+        if (!tileData.IsMovable())
         {
-            Debug.Log($"  BLOCKED: No TileComponent or TileData");
-            return false;
-        }
-
-        if (!tileComponent.tileData.IsMovable())
-        {
-            Debug.Log($"  BLOCKED: Tile is not movable (type: {tileComponent.tileData.tileType})");
             return false;
         }
 
         Vector2Int targetPosition = tilePosition + direction;
-        Debug.Log($"  Target Position (tile + direction): {targetPosition}");
 
         if (!_emptyPositions.Contains(targetPosition))
         {
-            Debug.Log($"  BLOCKED: Target {targetPosition} is not an empty position");
             return false;
         }
 
-        Debug.Log($"  ✅ SUCCESS: Slide approved to empty at {targetPosition}!");
         PushUndoRecord(tilePosition, targetPosition);
         StartCoroutine(AnimateSlide(tilePosition, targetPosition));
         return true;
@@ -206,7 +187,13 @@ public class TileSlideController : MonoBehaviour
     {
         _isAnimating = true;
 
-        GameObject movingTile = tileGrid.GetTile(fromPosition);
+        if (ActiveTileGrid == null)
+        {
+            _isAnimating = false;
+            yield break;
+        }
+
+        GameObject movingTile = ActiveTileGrid.GetTile(fromPosition);
         if (movingTile == null)
         {
             _isAnimating = false;
@@ -214,7 +201,14 @@ public class TileSlideController : MonoBehaviour
         }
 
         Vector3 startWorldPos = movingTile.transform.position;
-        Vector3 targetWorldPos = tileGrid.GetTile(toPosition).transform.position;
+        GameObject targetTile = ActiveTileGrid.GetTile(toPosition);
+        if (targetTile == null)
+        {
+            _isAnimating = false;
+            yield break;
+        }
+        
+        Vector3 targetWorldPos = targetTile.transform.position;
 
         float elapsedTime = 0f;
 
@@ -232,7 +226,7 @@ public class TileSlideController : MonoBehaviour
 
         movingTile.transform.position = targetWorldPos;
 
-        tileGrid.SwapTiles(fromPosition, toPosition);
+        ActiveTileGrid.SwapTiles(fromPosition, toPosition);
 
         _emptyPositions.Remove(toPosition);
         _emptyPositions.Add(fromPosition);
@@ -250,36 +244,30 @@ public class TileSlideController : MonoBehaviour
     private void FindAllEmptyPositions()
     {
         _emptyPositions.Clear();
-        Debug.Log("[TileSlideController] === Finding ALL Empty Positions ===");
+        
+        if (ActiveTileGrid == null)
+        {
+            Debug.LogWarning("[TileSlideController] ActiveTileGrid is null, cannot find empty positions");
+            return;
+        }
         
         for (int x = 0; x < 100; x++)
         {
             for (int y = 0; y < 100; y++)
             {
                 Vector2Int gridPos = new Vector2Int(x, y);
-                GameObject tile = tileGrid.GetTile(gridPos);
+                TileData tileData = ActiveTileGrid.GetTileData(gridPos);
 
-                if (tile != null)
+                if (tileData != null && tileData.tileType == TileType.Empty)
                 {
-                    TileComponent tileComponent = tile.GetComponent<TileComponent>();
-                    if (tileComponent != null && 
-                        tileComponent.tileData != null && 
-                        tileComponent.tileData.tileType == TileType.Empty)
-                    {
-                        _emptyPositions.Add(gridPos);
-                        Debug.Log($"[TileSlideController] ✅ Empty tile found at {gridPos}");
-                    }
+                    _emptyPositions.Add(gridPos);
                 }
             }
         }
 
         if (_emptyPositions.Count == 0)
         {
-            Debug.LogError("[TileSlideController] ❌ No Empty tiles found in grid!");
-        }
-        else
-        {
-            Debug.Log($"[TileSlideController] Total empty tiles found: {_emptyPositions.Count}");
+            Debug.LogError("[TileSlideController] No Empty tiles found in grid!");
         }
     }
 }

@@ -27,13 +27,13 @@ public class PlayerController : MonoBehaviour
 
         if (somethingIsHit)
         {
-            if (raycastHit.transform.TryGetComponent<TileComponent>(out var tileComponent))
+            if (raycastHit.transform.TryGetComponent<TileBase>(out var tileBase))
             {
-                bool slideSuccess = slideController.TrySlide(tileComponent.gridPosition);
+                bool slideSuccess = slideController.TrySlide(tileBase.gridPosition);
                 
                 if (slideSuccess)
                 {
-                    Debug.Log($"Tile slid from {tileComponent.gridPosition} to empty position");
+                    Debug.Log($"Tile slid from {tileBase.gridPosition} to empty position");
                 }
             }
         }
