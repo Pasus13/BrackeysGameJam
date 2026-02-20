@@ -288,47 +288,39 @@ public class CharacterMover : MonoBehaviour
     {
         Transform movingTransform = _characterInstance != null ? _characterInstance.transform : transform;
 
-        // Prepare context and resolve tile effect
-        TileEffectContext context = new TileEffectContext
+        Vector3 startPos = movingTransform.position;
+        Vector3 targetPos = tileGrid.GridToWorldPosition(targetGridPos);
+        targetPos.y += heightOffset;
+        float elapsedTime = 0f;
+
+        while (elapsedTime < stepDuration)
         {
-            tileGrid = tileGrid,
-            position = targetGridPos,
-            direction = _moveDirection,
-            tileData = tileData
-        };
+            elapsedTime += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsedTime / stepDuration);
+            movingTransform.position = Vector3.Lerp(startPos, targetPos, t);
+            yield return null;
+        }
 
-        TileEffectResult result = TileEffectResolver.Resolve(ref context);
+        movingTransform.position = targetPos;
+        _currentGridPosition = targetGridPos;
 
-<<<<<<< Updated upstream
-        _moveDirection = context.direction;
-
-        yield return StartCoroutine(
-            PlayVisual(context.visualEffect, movingTransform, context.position));
-
-        _currentGridPosition = context.position;
-
-        Debug.Log($"[CharacterMover] Finished moving to {_currentGridPosition}");
-=======
         TileEffectResult result = TileEffectResolver.Resolve(
             tileData,
             tileGrid,
             ref _moveDirection,
             _currentGridPosition
         );
->>>>>>> Stashed changes
 
         switch (result)
         {
             case TileEffectResult.Win:
-                _isMoving = false;
                 OnGoalReached?.Invoke();
+                _isMoving = false;
                 break;
 
             case TileEffectResult.Fail:
-                _isMoving = false;
-<<<<<<< Updated upstream
                 OnMoveFailed?.Invoke();
-=======
+                _isMoving = false;
                 break;
 
             case TileEffectResult.Teleport:
@@ -347,7 +339,6 @@ public class CharacterMover : MonoBehaviour
                     OnMoveFailed?.Invoke();
                     _isMoving = false;
                 }
->>>>>>> Stashed changes
                 break;
 
             case TileEffectResult.Jump:
