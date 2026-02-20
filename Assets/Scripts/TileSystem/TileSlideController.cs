@@ -44,21 +44,14 @@ public class TileSlideController : MonoBehaviour
             return false;
         }
 
-        GameObject clickedTile = tileGrid.GetTile(clickedTilePosition);
-        if (clickedTile == null)
+        TileData clickedTileData = tileGrid.GetTileData(clickedTilePosition);
+        if (clickedTileData == null)
         {
             return false;
         }
 
-        TileComponent tileComponent = clickedTile.GetComponent<TileComponent>();
-        if (tileComponent == null || tileComponent.tileData == null)
+        if (!clickedTileData.IsMovable())
         {
-            return false;
-        }
-
-        if (!tileComponent.tileData.IsMovable())
-        {
-            Debug.Log($"[TileSlideController] Tile at {clickedTilePosition} is not movable (type: {tileComponent.tileData.tileType})");
             return false;
         }
 
@@ -77,47 +70,29 @@ public class TileSlideController : MonoBehaviour
 
     public bool TrySlideInDirection(Vector2Int tilePosition, Vector2Int direction)
     {
-        Debug.Log($"[TileSlideController] === TrySlideInDirection ===");
-        Debug.Log($"  Tile Position: {tilePosition}");
-        Debug.Log($"  Direction: {direction}");
-        Debug.Log($"  Empty Positions: {string.Join(", ", _emptyPositions)}");
-        
         if (_isAnimating)
         {
-            Debug.Log($"  BLOCKED: Currently animating");
             return false;
         }
 
-        GameObject tile = tileGrid.GetTile(tilePosition);
-        if (tile == null)
+        TileData tileData = tileGrid.GetTileData(tilePosition);
+        if (tileData == null)
         {
-            Debug.Log($"  BLOCKED: Tile not found at {tilePosition}");
             return false;
         }
 
-        TileComponent tileComponent = tile.GetComponent<TileComponent>();
-        if (tileComponent == null || tileComponent.tileData == null)
+        if (!tileData.IsMovable())
         {
-            Debug.Log($"  BLOCKED: No TileComponent or TileData");
-            return false;
-        }
-
-        if (!tileComponent.tileData.IsMovable())
-        {
-            Debug.Log($"  BLOCKED: Tile is not movable (type: {tileComponent.tileData.tileType})");
             return false;
         }
 
         Vector2Int targetPosition = tilePosition + direction;
-        Debug.Log($"  Target Position (tile + direction): {targetPosition}");
 
         if (!_emptyPositions.Contains(targetPosition))
         {
-            Debug.Log($"  BLOCKED: Target {targetPosition} is not an empty position");
             return false;
         }
 
-        Debug.Log($"  ✅ SUCCESS: Slide approved to empty at {targetPosition}!");
         PushUndoRecord(tilePosition, targetPosition);
         StartCoroutine(AnimateSlide(tilePosition, targetPosition));
         return true;
@@ -250,36 +225,24 @@ public class TileSlideController : MonoBehaviour
     private void FindAllEmptyPositions()
     {
         _emptyPositions.Clear();
-        Debug.Log("[TileSlideController] === Finding ALL Empty Positions ===");
         
         for (int x = 0; x < 100; x++)
         {
             for (int y = 0; y < 100; y++)
             {
                 Vector2Int gridPos = new Vector2Int(x, y);
-                GameObject tile = tileGrid.GetTile(gridPos);
+                TileData tileData = tileGrid.GetTileData(gridPos);
 
-                if (tile != null)
+                if (tileData != null && tileData.tileType == TileType.Empty)
                 {
-                    TileComponent tileComponent = tile.GetComponent<TileComponent>();
-                    if (tileComponent != null && 
-                        tileComponent.tileData != null && 
-                        tileComponent.tileData.tileType == TileType.Empty)
-                    {
-                        _emptyPositions.Add(gridPos);
-                        Debug.Log($"[TileSlideController] ✅ Empty tile found at {gridPos}");
-                    }
+                    _emptyPositions.Add(gridPos);
                 }
             }
         }
 
         if (_emptyPositions.Count == 0)
         {
-            Debug.LogError("[TileSlideController] ❌ No Empty tiles found in grid!");
-        }
-        else
-        {
-            Debug.Log($"[TileSlideController] Total empty tiles found: {_emptyPositions.Count}");
+            Debug.LogError("[TileSlideController] No Empty tiles found in grid!");
         }
     }
 }

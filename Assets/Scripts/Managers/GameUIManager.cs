@@ -8,14 +8,17 @@ public class GameUIManager : MonoBehaviour
     [SerializeField] private GameObject winText;
     [SerializeField] private GameObject failText;
 
+    private Button _playButtonComponent;
+    private bool _isPlayButtonEnabled = true;
+
     private void Start()
     {
         if (playButton != null)
         {
-            Button button = playButton.GetComponent<Button>();
-            if (button != null)
+            _playButtonComponent = playButton.GetComponent<Button>();
+            if (_playButtonComponent != null)
             {
-                button.onClick.AddListener(OnPlayButtonClicked);
+                _playButtonComponent.onClick.AddListener(OnPlayButtonClicked);
                 Debug.Log("[GameUIManager] Play button connected successfully");
             }
             else
@@ -43,7 +46,18 @@ public class GameUIManager : MonoBehaviour
 
     public void OnPlayButtonClicked()
     {
-        Debug.Log("[GameUIManager] Play button clicked");
+        if (!_isPlayButtonEnabled)
+        {
+            return;
+        }
+
+        _isPlayButtonEnabled = false;
+        
+        if (_playButtonComponent != null)
+        {
+            _playButtonComponent.interactable = false;
+        }
+        
         GameStateMachine.Instance?.TransitionTo<State_Playing>();
     }
 
@@ -52,7 +66,12 @@ public class GameUIManager : MonoBehaviour
         if (playButton != null)
         {
             playButton.gameObject.SetActive(true);
-            Debug.Log("[GameUIManager] Play button shown");
+            _isPlayButtonEnabled = true;
+            
+            if (_playButtonComponent != null)
+            {
+                _playButtonComponent.interactable = true;
+            }
         }
     }
 
@@ -61,7 +80,6 @@ public class GameUIManager : MonoBehaviour
         if (playButton != null)
         {
             playButton.gameObject.SetActive(false);
-            Debug.Log("[GameUIManager] Play button hidden");
         }
     }
 

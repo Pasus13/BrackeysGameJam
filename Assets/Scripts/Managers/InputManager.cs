@@ -192,16 +192,16 @@ public class InputManager : MonoBehaviour
 
         if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, tileLayerMask))
         {
-            if (hit.transform.TryGetComponent<TileComponent>(out var tileComponent))
+            if (hit.transform.TryGetComponent<TileBase>(out var tileBase))
             {
-                if (tileComponent.tileData != null && !tileComponent.tileData.IsSelectable())
+                if (tileBase.tileData != null && !tileBase.tileData.IsSelectable())
                 {
-                    Debug.Log($"[InputManager] Tile at {tileComponent.gridPosition} is not selectable (type: {tileComponent.tileData.tileType})");
+                    Debug.Log($"[InputManager] Tile at {tileBase.gridPosition} is not selectable (type: {tileBase.tileData.tileType})");
                     return false;
                 }
                 
                 tileObject = hit.transform.gameObject;
-                gridPosition = tileComponent.gridPosition;
+                gridPosition = tileBase.gridPosition;
                 return true;
             }
         }

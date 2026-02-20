@@ -784,7 +784,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 612eb34659cec104cbde240c5ee628fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TileGrid
-  boardData: {fileID: 11400000, guid: 4aebfd8c21d050f469e5e57bebd27c14, type: 2}
+  boardData: {fileID: 11400000, guid: 996defd4f89439f42aa191e5fcab53ca, type: 2}
   tileSpacing: 1
   emptyMaterial: {fileID: 2100000, guid: d71f3bed474897f49a9f09f1699a4f17, type: 2}
   normalMaterial: {fileID: 2100000, guid: b1a91794492e61d4e8f777fd66d96053, type: 2}

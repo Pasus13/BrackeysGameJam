@@ -6,25 +6,6 @@ public class TileGrid : MonoBehaviour
     [SerializeField] private BoardData boardData;
     [SerializeField] private float tileSpacing = 1f;
     
-    [Header("Tile Materials")]
-    [SerializeField] private Material emptyMaterial;
-    [SerializeField] private Material normalMaterial;
-    [SerializeField] private Material lockedMaterial;
-    [SerializeField] private Material portalMaterial;
-    [SerializeField] private Material teleportMaterial;
-    [SerializeField] private Material rotate90Material;
-    [SerializeField] private Material rotate90LeftMaterial;
-    [SerializeField] private Material rotate90RightMaterial;
-    [SerializeField] private Material rotate180Material;
-    [SerializeField] private Material jumpForwardMaterial;
-    [SerializeField] private Material jumpVerticalMaterial;
-    [SerializeField] private Material speedUpMaterial;
-    [SerializeField] private Material blockMaterial;
-    [SerializeField] private Material triggerMaterial;
-    [SerializeField] private Material doorMaterial;
-    [SerializeField] private Material startingTileMaterial;
-    [SerializeField] private Material goalTileMaterial;
-    
     public delegate void TilesInstantiatedHandler();
     public event TilesInstantiatedHandler OnTilesInstantiated;
     
@@ -67,12 +48,14 @@ public class TileGrid : MonoBehaviour
             tileObject.name = $"Tile_{tileInstance.gridPosition.x}_{tileInstance.gridPosition.y}";
             
             TileBase tileBase = tileObject.GetComponent<TileBase>();
-            if (tileBase != null)
+            if (tileBase == null)
             {
-                tileBase.Initialize(tileInstance.tileData, tileInstance.gridPosition);
+                tileBase = tileObject.AddComponent<TileBase>();
             }
             
-            ApplyMaterialToTile(tileObject, tileInstance.tileData.tileType);
+            tileBase.Initialize(tileInstance.tileData, tileInstance.gridPosition);
+            
+            ApplyMaterialToTile(tileObject, tileInstance.tileData);
             
             if (tileInstance.tileData.tileType == TileType.Empty)
             {
@@ -85,8 +68,7 @@ public class TileGrid : MonoBehaviour
             
             tiles[tileInstance.gridPosition] = tileObject;
         }
-        
-        Debug.Log("[TileGrid] Tiles instantiation complete, notifying listeners");
+
         OnTilesInstantiated?.Invoke();
     }
 
@@ -95,6 +77,20 @@ public class TileGrid : MonoBehaviour
         if (tiles.TryGetValue(gridPosition, out GameObject tile))
         {
             return tile;
+        }
+        return null;
+    }
+
+    public TileData GetTileData(Vector2Int gridPosition)
+    {
+        GameObject tile = GetTile(gridPosition);
+        if (tile != null)
+        {
+            TileBase tileBase = tile.GetComponent<TileBase>();
+            if (tileBase != null)
+            {
+                return tileBase.tileData;
+            }
         }
         return null;
     }
@@ -121,17 +117,17 @@ public class TileGrid : MonoBehaviour
         tileB.transform.position = worldPosA;
 
         tiles[positionA] = tileB;
-        tileB.GetComponent<TileComponent>().gridPosition = positionA;
+        tileB.GetComponent<TileBase>().gridPosition = positionA;
         tiles[positionB] = tileA;
-        tileA.GetComponent<TileComponent>().gridPosition = positionB;
+        tileA.GetComponent<TileBase>().gridPosition = positionB;
     }
 
     public void TrySwap(Vector2Int positionA)
     {
         GameObject tileA = GetTile(positionA);
-        TileComponent tileComponentA = tileA.GetComponent<TileComponent>();
+        TileBase tileBaseA = tileA.GetComponent<TileBase>();
 
-        if (tileComponentA.tileData.isLocked) { return; }
+        if (tileBaseA.tileData.isLocked) { return; }
 
         Vector2Int[] positionsToCheck = new Vector2Int[] { 
             Vector2Int.up,
@@ -144,8 +140,8 @@ public class TileGrid : MonoBehaviour
             GameObject tileB = GetTile(positionB);
             if (tileB == null) { continue; }
 
-            TileComponent tileComponentB = tileB.GetComponent<TileComponent>();
-            if (tileComponentB.tileData.tileType == TileType.Empty)
+            TileBase tileBaseB = tileB.GetComponent<TileBase>();
+            if (tileBaseB.tileData.tileType == TileType.Empty)
             {
                 SwapTiles(positionA, positionB);
                 break;
@@ -158,42 +154,15 @@ public class TileGrid : MonoBehaviour
         return new Vector3(gridPosition.x * tileSpacing, 0, gridPosition.y * tileSpacing);
     }
 
-    private void ApplyMaterialToTile(GameObject tileObject, TileType tileType)
+    private void ApplyMaterialToTile(GameObject tileObject, TileData tileData)
     {
-        Material material = GetMaterialForType(tileType);
-        
-        if (material != null)
+        if (tileData.material != null)
         {
             MeshRenderer[] renderers = tileObject.GetComponentsInChildren<MeshRenderer>();
             foreach (MeshRenderer renderer in renderers)
             {
-                renderer.sharedMaterial = material;
+                renderer.sharedMaterial = tileData.material;
             }
-        }
-    }
-
-    private Material GetMaterialForType(TileType tileType)
-    {
-        switch (tileType)
-        {
-            case TileType.Empty: return emptyMaterial;
-            case TileType.Normal: return normalMaterial;
-            case TileType.Locked: return lockedMaterial;
-            case TileType.Portal: return portalMaterial;
-            case TileType.Teleport: return teleportMaterial;
-            case TileType.Rotate90: return rotate90Material;
-            case TileType.Rotate90Left: return rotate90LeftMaterial;
-            case TileType.Rotate90Right: return rotate90RightMaterial;
-            case TileType.Rotate180: return rotate180Material;
-            case TileType.JumpForward: return jumpForwardMaterial;
-            case TileType.JumpVertical: return jumpVerticalMaterial;
-            case TileType.SpeedUp: return speedUpMaterial;
-            case TileType.Block: return blockMaterial;
-            case TileType.Trigger: return triggerMaterial;
-            case TileType.Door: return doorMaterial;
-            case TileType.StartingTile: return startingTileMaterial;
-            case TileType.GoalTile: return goalTileMaterial;
-            default: return normalMaterial;
         }
     }
 

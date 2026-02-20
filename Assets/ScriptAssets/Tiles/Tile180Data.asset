@@ -12,8 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 56302636697ccde4ca65f26a9c8672e3, type: 3}
   m_Name: Tile180Data
   m_EditorClassIdentifier: Assembly-CSharp::TileData
-  tileType: 8
+  tileType: 7
   isLocked: 0
   isWalkable: 1
   prefab: {fileID: 2494740354578921905, guid: 9d1c5c0107a63814eaf7b142e27332f0, type: 3}
+  material: {fileID: 2100000, guid: e714e4a8404eb6043ada7f350dbd74de, type: 2}
   highlightColor: {r: 1, g: 0.6, b: 0.3, a: 1}
+  teleportID: 0
+  exitDirection: {x: 1, y: 0}

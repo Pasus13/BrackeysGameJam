@@ -34,8 +34,8 @@ public class BoardDataGeneratorEditor : Editor
             ? generator.tileRoot
             : generator.transform;
 
-        TileComponent[] tiles =
-            root.GetComponentsInChildren<TileComponent>();
+        TileBase[] tiles =
+            root.GetComponentsInChildren<TileBase>();
 
         if (tiles.Length == 0)
         {

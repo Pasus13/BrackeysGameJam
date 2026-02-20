@@ -5,7 +5,6 @@ public enum TileType
     Locked,
     Portal,
     Teleport,
-    Rotate90,
     Rotate90Left,
     Rotate90Right,
     Rotate180,

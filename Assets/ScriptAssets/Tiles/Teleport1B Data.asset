@@ -15,7 +15,10 @@ MonoBehaviour:
   tileType: 4
   isLocked: 0
   isWalkable: 1
-  prefab: {fileID: 2494740354578921905, guid: 9d1c5c0107a63814eaf7b142e27332f0, type: 3}
-  highlightColor: {r: 0.6, g: 0.3, b: 1, a: 1}
+  isNotJumpable: 0
+  prefab: {fileID: 6219254133740599584, guid: b63a8cb1096d31a48990c09de256a8e8, type: 3}
+  material: {fileID: 2100000, guid: 60538eec07010724da160838e4586cac, type: 2}
+  highlightColor: {r: 0.36862746, g: 0.13656995, b: 0.9339623, a: 1}
+  jumpDistance: 1
   teleportID: 1
   exitDirection: {x: 1, y: 0}

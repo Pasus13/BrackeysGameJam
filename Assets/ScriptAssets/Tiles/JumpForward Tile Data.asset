@@ -10,13 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 56302636697ccde4ca65f26a9c8672e3, type: 3}
-  m_Name: Test Starting Tile Data
+  m_Name: JumpForward Tile Data
   m_EditorClassIdentifier: Assembly-CSharp::TileData
-  tileType: 15
-  isLocked: 1
+  tileType: 8
+  isLocked: 0
   isWalkable: 1
-  prefab: {fileID: 2494740354578921905, guid: 9d1c5c0107a63814eaf7b142e27332f0, type: 3}
-  material: {fileID: 2100000, guid: 047da26b252989b4cbf45eefbd2d4f75, type: 2}
-  highlightColor: {r: 0.6901961, g: 0.6039216, b: 0.21176471, a: 1}
+  isNotJumpable: 0
+  prefab: {fileID: 3963073141262087069, guid: 49e8027eae0c5d04caeef1c4c8c2ddbb, type: 3}
+  material: {fileID: 2100000, guid: 281a3ab3d0342184abca09843ecc8771, type: 2}
+  highlightColor: {r: 0.2198736, g: 0.764151, b: 0.28324345, a: 1}
+  jumpDistance: 1
   teleportID: 0
   exitDirection: {x: 1, y: 0}
