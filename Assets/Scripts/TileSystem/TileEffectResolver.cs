@@ -4,32 +4,33 @@ public enum TileEffectResult
 {
     Continue,
     Win,
-    Fail,
-    Teleport,
-    Jump
+    Fail
 }
 
 public static class TileEffectResolver
 {
-    public static TileEffectResult Resolve(TileData tileData, TileGrid tileGrid, ref Vector2Int currentDirection, Vector2Int currentPosition)
+    public static TileEffectResult Resolve(ref TileEffectContext context)
     {
-        TileType tileType = tileData.tileType;
-
-        switch (tileType)
+        switch (context.tileData.tileType)
         {
             case TileType.Normal:
+                Debug.Log($"[TileEffectResolver] Normal tile at {context.position} - Continue");
                 return TileEffectResult.Continue;
 
             case TileType.GoalTile:
+                Debug.Log($"[TileEffectResolver] Goal tile at {context.position} - Win!");
                 return TileEffectResult.Win;
 
             case TileType.Block:
+                Debug.Log($"[TileEffectResolver] Block tile at {context.position} - Fail");
                 return TileEffectResult.Fail;
 
             case TileType.Empty:
+                Debug.Log($"[TileEffectResolver] Empty tile at {context.position} - Fail");
                 return TileEffectResult.Fail;
 
             case TileType.StartingTile:
+                Debug.Log($"[TileEffectResolver] Starting tile at {context.position} - Continue");
                 return TileEffectResult.Continue;
 
             case TileType.Locked:
@@ -41,22 +42,44 @@ public static class TileEffectResolver
                 return TileEffectResult.Continue;
 
             case TileType.Teleport:
-                return TileEffectResult.Teleport;
+                {
+                    Debug.Log($"[TileEffectResolver] Teleport triggered");
 
+                    if (FindTeleportPair(
+                        context.tileGrid,
+                        context.tileData.teleportID,
+                        context.position,
+                        out Vector2Int pairPosition,
+                        out Vector2Int exitDirection))
+                    {
+                        context.position = pairPosition;
+                        context.direction = exitDirection;
+
+                        context.visualEffect = TileEffectVisual.Teleport;
+
+                        return TileEffectResult.Continue;
+                    }
+
+                    return TileEffectResult.Fail;
+                }
             case TileType.Rotate90Left:
-                currentDirection = RotateDirectionLeft(currentDirection);
+                Debug.Log($"[TileEffectResolver] Rotate90Left tile at {context.position} - Rotating left (anticlockwise)");
+                context.direction = RotateDirectionLeft(context.direction);
                 return TileEffectResult.Continue;
 
             case TileType.Rotate90Right:
-                currentDirection = RotateDirectionRight(currentDirection);
+                Debug.Log($"[TileEffectResolver] Rotate90Right tile at {context.position} - Rotating right (clockwise)");
+                context.direction = RotateDirectionRight(context.direction);
                 return TileEffectResult.Continue;
 
             case TileType.Rotate180:
-                currentDirection = RotateDirection180(currentDirection);
+                Debug.Log($"[TileEffectResolver] Rotate180 tile at {context.position} - Rotating 180°");
+                context.direction = RotateDirection180(context.direction);
                 return TileEffectResult.Continue;
 
             case TileType.JumpForward:
-                return HandleJumpForward(tileData, tileGrid, currentDirection, currentPosition);
+                return HandleJumpForward(ref context);
+                    
 
             case TileType.JumpVertical:
                 Debug.LogWarning($"[TileEffectResolver] TileType 'JumpVertical' not yet implemented - treating as Normal");
@@ -75,11 +98,10 @@ public static class TileEffectResolver
                 return TileEffectResult.Continue;
 
             default:
-                Debug.LogWarning($"[TileEffectResolver] TileType '{tileType}' not recognized - treating as Normal");
+                Debug.LogWarning($"[TileEffectResolver] TileType '{context.tileData.tileType}' not recognized - treating as Normal");
                 return TileEffectResult.Continue;
         }
     }
-
     private static Vector2Int RotateDirectionLeft(Vector2Int direction)
     {
         return new Vector2Int(-direction.y, direction.x);
@@ -94,6 +116,8 @@ public static class TileEffectResolver
     {
         return new Vector2Int(-direction.x, -direction.y);
     }
+
+    
 
     public static bool FindTeleportPair(
     TileGrid tileGrid,
@@ -112,22 +136,27 @@ public static class TileEffectResolver
             return false;
         }
 
+        // Buscar todos los tiles en el grid
         var allTiles = tileGrid.GetAllTiles();
 
         foreach (var kvp in allTiles)
         {
             Vector2Int pos = kvp.Key;
+            GameObject tileObj = kvp.Value;
 
+            // Ignorar el tile actual
             if (pos == currentPosition)
                 continue;
 
-            TileData tileData = tileGrid.GetTileData(pos);
-            if (tileData != null)
+            // Verificar si es un teleport con el mismo ID
+            TileBase tileBase = tileObj.GetComponent<TileBase>();
+            if (tileBase != null && tileBase.tileData != null)
             {
-                if (tileData.tileType == TileType.Teleport && tileData.teleportID == teleportID)
+                if (tileBase.tileData.tileType == TileType.Teleport && tileBase.tileData.teleportID == teleportID)
                 {
                     pairPosition = pos;
-                    exitDirection = tileData.exitDirection;
+                    exitDirection = tileBase.tileData.exitDirection;
+                    Debug.Log($"[TileEffectResolver] Found teleport pair at {pairPosition} with exit direction {exitDirection}");
                     return true;
                 }
             }
@@ -137,33 +166,30 @@ public static class TileEffectResolver
         return false;
     }
 
-    private static TileEffectResult HandleJumpForward(TileData jumpTileData, TileGrid tileGrid, Vector2Int currentDirection, Vector2Int currentPosition)
+    private static TileEffectResult HandleJumpForward(
+    ref TileEffectContext context)
     {
-        int jumpDistance = jumpTileData.jumpDistance;
+        Debug.Log("[TileEffectResolver] JumpForward triggered");
 
-        Vector2Int intermediatePosition = currentPosition + currentDirection;
-        Vector2Int landingPosition = currentPosition + (currentDirection * (jumpDistance + 1));
+        Vector2Int landing =
+            context.position +
+            context.direction *
+            (context.tileData.jumpDistance + 1);
 
-        TileData intermediateTileData = tileGrid.GetTileData(intermediatePosition);
-        if (intermediateTileData != null && intermediateTileData.isNotJumpable)
-        {
-            Debug.LogWarning($"[TileEffectResolver] Cannot jump - intermediate tile at {intermediatePosition} is not jumpable!");
+        GameObject landingTile =
+            context.tileGrid.GetTile(landing);
+
+        if (landingTile == null)
             return TileEffectResult.Fail;
-        }
 
-        TileData landingTileData = tileGrid.GetTileData(landingPosition);
-        if (landingTileData == null)
-        {
-            Debug.LogWarning($"[TileEffectResolver] Cannot jump - no landing tile at {landingPosition}!");
+        TileBase tileBase =
+            landingTile.GetComponent<TileBase>();
+
+        if (!tileBase.tileData.isWalkable)
             return TileEffectResult.Fail;
-        }
+        context.position = landing;
+        context.visualEffect = TileEffectVisual.Jump;
 
-        if (!landingTileData.isWalkable)
-        {
-            Debug.LogWarning($"[TileEffectResolver] Cannot jump - landing tile at {landingPosition} is not walkable!");
-            return TileEffectResult.Fail;
-        }
-
-        return TileEffectResult.Jump;
+        return TileEffectResult.Continue;
     }
 }
