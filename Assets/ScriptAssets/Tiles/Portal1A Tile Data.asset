@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Portal1A Tile Data
   m_EditorClassIdentifier: Assembly-CSharp::TileData
   tileType: 3
-  isLocked: 0
+  isLocked: 1
   isWalkable: 1
   isNotJumpable: 1
   prefab: {fileID: 6191711932125293659, guid: 5ebeaa2fe35bc8d459e78901ac482335, type: 3}
