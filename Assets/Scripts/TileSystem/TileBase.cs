@@ -38,8 +38,10 @@ public class TileBase : MonoBehaviour
 
         if (tileData != null && _highlightMaterial != null)
         {
+            // Make it transparent
+            SetMaterialTransparent(_highlightMaterial);
             Color highlightColor = tileData.highlightColor;
-            highlightColor.a = 0.6f;
+            highlightColor.a = 0.3f;
             _highlightMaterial.SetColor("_Color", highlightColor);
         }
     }
@@ -59,6 +61,18 @@ public class TileBase : MonoBehaviour
     public bool IsHighlighted()
     {
         return _isHighlighted;
+    }
+
+    private void SetMaterialTransparent(Material mat)
+    {
+        mat.SetFloat("_Mode", 3); // 3 = Transparent
+        mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+        mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+        mat.SetInt("_ZWrite", 0);
+        mat.DisableKeyword("_ALPHATEST_ON");
+        mat.DisableKeyword("_ALPHABLEND_ON");
+        mat.EnableKeyword("_ALPHAPREMULTIPLY_ON");
+        mat.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
     }
 
     protected virtual void OnDestroy()
