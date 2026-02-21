@@ -10,15 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cc1ca9ecaa6fa674f8fe157cd3f1673c, type: 3}
-  m_Name: Level2
+  m_Name: Level 1
   m_EditorClassIdentifier: Assembly-CSharp::LevelData
-  levelId: 1
+  levelId: 0
   boards:
-  - {fileID: 11400000, guid: 93a7ac463b5cec44ab223fa900ce2292, type: 2}
-  startingTile:
-    boardIndex: 0
-    position: {x: 0, y: 3}
+  - {fileID: 11400000, guid: f124a1c61079cfd4cbc7d70aeb4dad6f, type: 2}
   characterStartDirection: {x: 1, y: 0, z: 0}
-  goalTile:
-    boardIndex: 1
-    position: {x: 3, y: 3}
