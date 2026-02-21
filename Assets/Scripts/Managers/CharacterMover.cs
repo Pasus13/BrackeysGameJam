@@ -12,7 +12,9 @@ public class CharacterMover : MonoBehaviour
     [Header("Timing")]
     [SerializeField] private float stepPauseDuration = 0.05f;
 
-    private TileGrid ActiveTileGrid => BoardManager.Instance?.ActiveBoard?.TileGrid;
+    // Always uses the board the character is physically on, regardless of which
+    // board the camera/player is currently viewing.
+    private TileGrid CharacterTileGrid => BoardManager.Instance?.GetBoard(_currentBoardIndex)?.TileGrid;
     public delegate void GoalReachedHandler();
     public event GoalReachedHandler OnGoalReached;
 
@@ -36,6 +38,33 @@ public class CharacterMover : MonoBehaviour
     {
         OnGoalReached -= HandleGoalReached;
         OnMoveFailed -= HandleMoveFailed;
+        if (BoardManager.Instance != null)
+            BoardManager.Instance.OnBoardChanged -= OnBoardChanged;
+    }
+
+    private void Start()
+    {
+        if (BoardManager.Instance != null)
+            BoardManager.Instance.OnBoardChanged += OnBoardChanged;
+    }
+
+    private void OnBoardChanged(int previousIndex, int newIndex)
+    {
+        if (_characterInstance == null) return;
+
+        bool onActiveBoard = (newIndex == _currentBoardIndex);
+        SetCharacterVisible(onActiveBoard);
+
+        Debug.Log($"[CharacterMover] Board changed to {newIndex}. " +
+                  $"Character on board {_currentBoardIndex} → " +
+                  $"{(onActiveBoard ? "visible" : "hidden")}");
+    }
+    private void SetCharacterVisible(bool visible)
+    {
+        if (_characterInstance == null) return;
+
+        foreach (Renderer r in _characterInstance.GetComponentsInChildren<Renderer>(true))
+            r.enabled = visible;
     }
 
     public void SpawnCharacter()
@@ -57,7 +86,7 @@ public class CharacterMover : MonoBehaviour
             (int)levelData.characterStartDirection.z
         );
 
-        Vector3 spawnWorldPos = ActiveTileGrid.GridToWorldPosition(_currentGridPosition);
+        Vector3 spawnWorldPos = CharacterTileGrid.GridToWorldPosition(_currentGridPosition);
         spawnWorldPos.y += heightOffset;
 
         if (characterPrefab != null)
@@ -70,6 +99,12 @@ public class CharacterMover : MonoBehaviour
             transform.position = spawnWorldPos;
             _characterInstance = gameObject;
             Debug.Log($"[CharacterMover] Character positioned (no prefab) at {_currentGridPosition}");
+        }
+
+        if (BoardManager.Instance != null)
+        {
+            bool onActiveBoard = (BoardManager.Instance.ActiveBoardIndex == _currentBoardIndex);
+            SetCharacterVisible(onActiveBoard);
         }
 
         Debug.Log($"[CharacterMover] Initialized at board {_currentBoardIndex}, position {_currentGridPosition}, direction: {_moveDirection}");
@@ -131,7 +166,7 @@ public class CharacterMover : MonoBehaviour
         Vector3 startPos = movingTransform.position;
 
         Vector3 targetPos =
-            ActiveTileGrid.GridToWorldPosition(targetGridPos);
+            CharacterTileGrid.GridToWorldPosition(targetGridPos);
         targetPos.y += heightOffset;
 
         float elapsedTime = 0f;
@@ -157,7 +192,7 @@ public class CharacterMover : MonoBehaviour
         Vector3 startPos = movingTransform.position;
 
         Vector3 targetPos =
-            ActiveTileGrid.GridToWorldPosition(targetGridPos);
+            CharacterTileGrid.GridToWorldPosition(targetGridPos);
         targetPos.y += heightOffset;
 
         float jumpHeight = 1.0f;
@@ -189,7 +224,7 @@ public class CharacterMover : MonoBehaviour
         Vector3 shrinkScale = Vector3.zero;
 
         Vector3 targetPos =
-            ActiveTileGrid.GridToWorldPosition(targetGridPos);
+            CharacterTileGrid.GridToWorldPosition(targetGridPos);
         targetPos.y += heightOffset;
 
         float duration = stepDuration * 0.4f;
@@ -230,7 +265,7 @@ public class CharacterMover : MonoBehaviour
         {
             Vector2Int nextPosition = _currentGridPosition + _moveDirection;
 
-            GameObject nextTile = ActiveTileGrid.GetTile(nextPosition);
+            GameObject nextTile = CharacterTileGrid.GetTile(nextPosition);
             if (nextTile == null)
             {
                 Debug.Log("[CharacterMover] No tile ahead, movement failed");
@@ -320,11 +355,11 @@ public class CharacterMover : MonoBehaviour
         while (resolving)
         {
             TileData currentTile =
-                ActiveTileGrid.GetTileData(_currentGridPosition);
+                CharacterTileGrid.GetTileData(_currentGridPosition);
 
             TileEffectContext context = new TileEffectContext
             {
-                tileGrid = ActiveTileGrid,
+                tileGrid = CharacterTileGrid,
                 position = _currentGridPosition,
                 direction = _moveDirection,
                 tileData = currentTile
