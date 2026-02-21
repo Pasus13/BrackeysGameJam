@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 56302636697ccde4ca65f26a9c8672e3, type: 3}
-  m_Name: Portal1A Tile Data
+  m_Name: Test Starting Tile Data
   m_EditorClassIdentifier: Assembly-CSharp::TileData
-  tileType: 3
+  tileType: 14
   isLocked: 1
   isWalkable: 1
-  isNotJumpable: 1
-  prefab: {fileID: 6191711932125293659, guid: 5ebeaa2fe35bc8d459e78901ac482335, type: 3}
-  material: {fileID: 2100000, guid: 3ee5f921a4cf4f745bccbd4b03acc50b, type: 2}
-  highlightColor: {r: 0.6663792, g: 0.2653524, b: 0.8396226, a: 1}
+  isNotJumpable: 0
+  prefab: {fileID: 2494740354578921905, guid: ecb6543f9246046409eb3019a3a643ce, type: 3}
+  material: {fileID: 2100000, guid: 047da26b252989b4cbf45eefbd2d4f75, type: 2}
+  highlightColor: {r: 0.6901961, g: 0.6039216, b: 0.21176471, a: 1}
   jumpDistance: 1
-  teleportID: 1
+  teleportID: 0
   exitDirection: {x: 1, y: 0}
