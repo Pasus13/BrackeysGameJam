@@ -400,9 +400,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1861805484}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: GameUIManager, Assembly-CSharp
-        m_MethodName: OnPlayButtonClicked
+        m_MethodName: 
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -969,7 +969,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c9bb89a167a2b34792cd7aeb393aea4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TileSlideController
-  tileGrid: {fileID: 1054372550}
   slideDuration: 0.15
   maxUndoSteps: 20
 --- !u!4 &500773278
@@ -1325,9 +1324,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1861805484}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: GameUIManager, Assembly-CSharp
-        m_MethodName: OnPlayButtonClicked
+        m_MethodName: 
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1687,7 +1686,7 @@ MonoBehaviour:
   previousButton: {fileID: 67588217}
   nextButton: {fileID: 917754589}
   boardInfoText: {fileID: 0}
-  showOnlyInSetup: 1
+  startHidden: 0
 --- !u!114 &1267557581
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1948,7 +1947,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterMover
   characterPrefab: {fileID: 0}
-  tileGrid: {fileID: 1054372550}
   stepDuration: 0.3
   heightOffset: 0.5
   stepPauseDuration: 0.05

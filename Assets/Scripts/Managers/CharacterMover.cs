@@ -13,8 +13,6 @@ public class CharacterMover : MonoBehaviour
     [SerializeField] private float stepPauseDuration = 0.05f;
 
     private TileGrid ActiveTileGrid => BoardManager.Instance?.ActiveBoard?.TileGrid;
-
-
     public delegate void GoalReachedHandler();
     public event GoalReachedHandler OnGoalReached;
 
@@ -44,7 +42,6 @@ public class CharacterMover : MonoBehaviour
     {
         StopMoving();
         DespawnCharacter();
-        
         if (LevelManager.Instance == null || LevelManager.Instance.CurrentLevelData == null)
         {
             Debug.LogError("[CharacterMover] LevelManager or LevelData not found!");
@@ -233,22 +230,33 @@ public class CharacterMover : MonoBehaviour
         {
             Vector2Int nextPosition = _currentGridPosition + _moveDirection;
 
-            TileData nextTileData = ActiveTileGrid.GetTileData(nextPosition);
-            if (nextTileData == null)
+            GameObject nextTile = ActiveTileGrid.GetTile(nextPosition);
+            if (nextTile == null)
             {
+                Debug.Log("[CharacterMover] No tile ahead, movement failed");
                 OnMoveFailed?.Invoke();
                 _isMoving = false;
                 yield break;
             }
 
-            if (!nextTileData.isWalkable)
+            TileBase tileBase = nextTile.GetComponent<TileBase>();
+            if (tileBase == null || tileBase.tileData == null)
             {
+                Debug.Log("[CharacterMover] Invalid tile ahead, movement failed");
                 OnMoveFailed?.Invoke();
                 _isMoving = false;
                 yield break;
             }
 
-            yield return StartCoroutine(MoveStep(nextPosition, nextTileData));
+            if (!tileBase.tileData.isWalkable)
+            {
+                Debug.Log($"[CharacterMover] Blocked tile at {nextPosition} - Cannot walk there!");
+                OnMoveFailed?.Invoke();
+                _isMoving = false;
+                yield break;
+            }
+
+            yield return StartCoroutine(MoveStep(nextPosition, tileBase.tileData));
 
             if (!_isMoving)
             {
@@ -288,68 +296,81 @@ public class CharacterMover : MonoBehaviour
     }
 
 
-    private IEnumerator MoveStep(Vector2Int targetGridPos, TileData tileData)
+    private IEnumerator MoveStep(
+    Vector2Int targetGridPos,
+    TileData tileData)
     {
-        Transform movingTransform = _characterInstance != null ? _characterInstance.transform : transform;
+        Transform movingTransform =
+            _characterInstance != null
+            ? _characterInstance.transform
+            : transform;
 
-        Vector3 startPos = movingTransform.position;
-        Vector3 targetPos = ActiveTileGrid.GridToWorldPosition(targetGridPos);
-        targetPos.y += heightOffset;
-        float elapsedTime = 0f;
+        yield return StartCoroutine(
+            DefaultMoveVisual(
+                movingTransform,
+                targetGridPos));
 
-        while (elapsedTime < stepDuration)
-        {
-            elapsedTime += Time.deltaTime;
-            float t = Mathf.Clamp01(elapsedTime / stepDuration);
-            movingTransform.position = Vector3.Lerp(startPos, targetPos, t);
-            yield return null;
-        }
-
-        movingTransform.position = targetPos;
         _currentGridPosition = targetGridPos;
 
-        TileEffectResult result = TileEffectResolver.Resolve(
-            tileData,
-            ActiveTileGrid,
-            ref _moveDirection,
-            _currentGridPosition
-        );
+        // Chain resolve tile effects
+        TileEffectResult result = TileEffectResult.Continue;
+
+        bool resolving = true;
+
+        while (resolving)
+        {
+            TileData currentTile =
+                ActiveTileGrid.GetTileData(_currentGridPosition);
+
+            TileEffectContext context = new TileEffectContext
+            {
+                tileGrid = ActiveTileGrid,
+                position = _currentGridPosition,
+                direction = _moveDirection,
+                tileData = currentTile
+            };
+
+            Vector2Int previousPosition = context.position;
+
+            result = TileEffectResolver.Resolve(ref context);
+
+            Debug.Log(
+                $"[MoveStep] Chain resolve -> " +
+                $"from={previousPosition} " +
+                $"to={context.position} " +
+                $"visual={context.visualEffect}");
+
+            _moveDirection = context.direction;
+
+            // Play visual if movement happened
+            if (context.visualEffect != TileEffectVisual.None &&
+                context.position != previousPosition)
+            {
+                yield return StartCoroutine(
+                    PlayVisual(
+                        context.visualEffect,
+                        movingTransform,
+                        context.position));
+
+                _currentGridPosition = context.position;
+            }
+
+            // Continue resolving if position changed
+            resolving = context.position != previousPosition;
+        }
+
+        Debug.Log($"[CharacterMover] Finished moving to {_currentGridPosition}");
 
         switch (result)
         {
             case TileEffectResult.Win:
-                OnGoalReached?.Invoke();
                 _isMoving = false;
+                OnGoalReached?.Invoke();
                 break;
 
             case TileEffectResult.Fail:
-                OnMoveFailed?.Invoke();
                 _isMoving = false;
-                break;
-
-            case TileEffectResult.Teleport:
-                if (TileEffectResolver.FindTeleportPair(ActiveTileGrid, tileData.teleportID, _currentGridPosition, out Vector2Int pairPosition, out Vector2Int exitDirection))
-                {
-                    _currentGridPosition = pairPosition;
-                    _moveDirection = exitDirection;
-                    
-                    Vector3 teleportPos = ActiveTileGrid.GridToWorldPosition(pairPosition);
-                    teleportPos.y += heightOffset;
-                    movingTransform.position = teleportPos;
-                }
-                else
-                {
-                    Debug.LogError($"[CharacterMover] Teleport failed - no pair found for ID {tileData.teleportID}");
-                    OnMoveFailed?.Invoke();
-                    _isMoving = false;
-                }
-                break;
-
-            case TileEffectResult.Jump:
-                yield return StartCoroutine(HandleJump(tileData, _currentGridPosition));
-                break;
-
-            case TileEffectResult.Continue:
+                OnMoveFailed?.Invoke();
                 break;
         }
     }
@@ -374,101 +395,5 @@ public class CharacterMover : MonoBehaviour
     {
         _moveDirection = newDirection;
         Debug.Log($"[CharacterMover] Direction changed to {_moveDirection}");
-    }
-
-    private IEnumerator HandleJump(TileData jumpTileData, Vector2Int currentPosition)
-    {
-        Transform movingTransform = _characterInstance != null ? _characterInstance.transform : transform;
-        
-        int jumpDistance = jumpTileData.jumpDistance;
-        Vector2Int landingPosition = currentPosition + (_moveDirection * (jumpDistance + 1));
-        
-        Vector3 startPos = movingTransform.position;
-        Vector3 endPos = ActiveTileGrid.GridToWorldPosition(landingPosition);
-        endPos.y += heightOffset;
-        
-        float jumpHeight = 0.5f;
-        float jumpDuration = stepDuration * 1f;
-        float elapsedTime = 0f;
-        
-        while (elapsedTime < jumpDuration)
-        {
-            elapsedTime += Time.deltaTime;
-            float t = Mathf.Clamp01(elapsedTime / jumpDuration);
-            
-            Vector3 horizontalPos = Vector3.Lerp(startPos, endPos, t);
-            
-            float parabola = -4f * jumpHeight * t * t + 4f * jumpHeight * t;
-            
-            movingTransform.position = new Vector3(
-                horizontalPos.x,
-                startPos.y + parabola,
-                horizontalPos.z
-            );
-            
-            yield return null;
-        }
-        
-        movingTransform.position = endPos;
-        _currentGridPosition = landingPosition;
-        
-        TileData landingTileData = ActiveTileGrid.GetTileData(landingPosition);
-        if (landingTileData != null)
-        {
-            TileEffectResult landingResult = TileEffectResolver.Resolve(
-                landingTileData,
-                ActiveTileGrid,
-                ref _moveDirection,
-                _currentGridPosition
-            );
-            
-            if (landingResult == TileEffectResult.Fail || landingResult == TileEffectResult.Win)
-            {
-                yield return StartCoroutine(ProcessTileEffect(landingResult, landingTileData));
-            }
-        }
-    }
-
-    private IEnumerator ProcessTileEffect(TileEffectResult result, TileData tileData)
-    {
-        switch (result)
-        {
-            case TileEffectResult.Win:
-                OnGoalReached?.Invoke();
-                _isMoving = false;
-                break;
-                
-            case TileEffectResult.Fail:
-                OnMoveFailed?.Invoke();
-                _isMoving = false;
-                break;
-                
-            case TileEffectResult.Jump:
-                yield return StartCoroutine(HandleJump(tileData, _currentGridPosition));
-                break;
-                
-            case TileEffectResult.Teleport:
-                if (TileEffectResolver.FindTeleportPair(ActiveTileGrid, tileData.teleportID, _currentGridPosition, out Vector2Int pairPosition, out Vector2Int exitDirection))
-                {
-                    _currentGridPosition = pairPosition;
-                    _moveDirection = exitDirection;
-                    
-                    Transform movingTransform = _characterInstance != null ? _characterInstance.transform : transform;
-                    Vector3 teleportPos = ActiveTileGrid.GridToWorldPosition(pairPosition);
-                    teleportPos.y += heightOffset;
-                    movingTransform.position = teleportPos;
-                    
-                    Debug.Log($"[CharacterMover] Teleported to {_currentGridPosition}, new direction: {_moveDirection}");
-                }
-                else
-                {
-                    OnMoveFailed?.Invoke();
-                    _isMoving = false;
-                }
-                break;
-                
-            case TileEffectResult.Continue:
-                break;
-        }
     }
 }
