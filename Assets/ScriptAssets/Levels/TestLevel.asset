@@ -15,6 +15,7 @@ MonoBehaviour:
   levelId: -1
   boards:
   - {fileID: 11400000, guid: 4aebfd8c21d050f469e5e57bebd27c14, type: 2}
+  - {fileID: 11400000, guid: 93a7ac463b5cec44ab223fa900ce2292, type: 2}
   startingTile:
     boardIndex: 0
     position: {x: 0, y: 3}
