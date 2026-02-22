@@ -3,6 +3,9 @@ using UnityEngine;
 
 public class CharacterMover : MonoBehaviour
 {
+
+    [SerializeField] private Animator myAnimator;
+    [SerializeField] private Transform myTransform;
     [Header("Movement Settings")]
     [SerializeField] private float stepDuration = 0.3f;
     [SerializeField] private float heightOffset = 0.5f;
@@ -18,6 +21,7 @@ public class CharacterMover : MonoBehaviour
     public delegate void MoveFailedHandler();
     public event MoveFailedHandler OnMoveFailed;
 
+    Vector3 lastPosition;
     private GameObject _characterInstance;
     private int _currentBoardIndex;
     private Vector2Int _currentGridPosition;
@@ -48,8 +52,21 @@ public class CharacterMover : MonoBehaviour
 
     private void Start()
     {
+        lastPosition = myTransform.position;
         if (BoardManager.Instance != null)
             BoardManager.Instance.OnBoardChanged += OnBoardChanged;
+    }
+
+    private void Update()
+    {
+        Vector3 currentPosition = myTransform.position;
+        float speed = (currentPosition - lastPosition).magnitude / Time.deltaTime;
+        float targetSpeed = speed > 0.01f ? 1f : 0f;
+
+        float currentRunSpeed = myAnimator.GetFloat("runSpeed");
+        myAnimator.SetFloat("runSpeed", Mathf.Lerp(currentRunSpeed, targetSpeed, Time.deltaTime * 10f));
+
+        lastPosition = currentPosition;
     }
 
     private void OnBoardChanged(int previousIndex, int newIndex)
@@ -288,7 +305,7 @@ public class CharacterMover : MonoBehaviour
 
             yield return null;
         }
-
+        myAnimator.SetBool("isJumping", false);
         movingTransform.position = targetPos;
     }
 
@@ -395,6 +412,7 @@ public class CharacterMover : MonoBehaviour
                 break;
 
             case TileEffectVisual.Jump:
+                myAnimator.SetBool("isJumping", true);
                 yield return JumpVisual(
                     movingTransform,
                     targetGridPos);

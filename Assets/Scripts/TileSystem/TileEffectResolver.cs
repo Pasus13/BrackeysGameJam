@@ -264,30 +264,43 @@ public static class TileEffectResolver
         return false;
     }
 
-    private static TileEffectResult HandleJumpForward(
-    ref TileEffectContext context)
+    private static TileEffectResult HandleJumpForward(ref TileEffectContext context)
     {
         Debug.Log("[TileEffectResolver] JumpForward triggered");
 
-        Vector2Int landing =
-            context.position +
-            context.direction *
-            (context.tileData.jumpDistance + 1);
+        Vector2Int landing = context.position + context.direction * (context.tileData.jumpDistance + 1);
 
-        GameObject landingTile =
-            context.tileGrid.GetTile(landing);
+        // Check all tiles between jump tile and landing (exclusive of start, inclusive of landing)
+        for (int i = 1; i <= context.tileData.jumpDistance + 1; i++)
+        {
+            Vector2Int checkPos = context.position + context.direction * i;
+            GameObject checkTile = context.tileGrid.GetTile(checkPos);
 
-        if (landingTile == null)
-            return TileEffectResult.Fail;
+            if (checkTile == null)
+                return TileEffectResult.Fail;
 
-        TileBase tileBase =
-            landingTile.GetComponent<TileBase>();
+            TileBase checkBase = checkTile.GetComponent<TileBase>();
+            if (checkBase == null || checkBase.tileData == null)
+                return TileEffectResult.Fail;
 
-        if (!tileBase.tileData.isWalkable)
-            return TileEffectResult.Fail;
+            bool isLandingTile = (i == context.tileData.jumpDistance + 1);
+
+            if (isLandingTile)
+            {
+                // Landing tile must be walkable and jumpable
+                if (!checkBase.tileData.isWalkable || !checkBase.tileData.isJumpable)
+                    return TileEffectResult.Fail;
+            }
+            else
+            {
+                // Intermediate tiles only need to be jumpable (can be non-walkable, e.g. a gap)
+                if (!checkBase.tileData.isJumpable)
+                    return TileEffectResult.Fail;
+            }
+        }
+
         context.position = landing;
         context.visualEffect = TileEffectVisual.Jump;
-
         return TileEffectResult.Continue;
     }
 }
