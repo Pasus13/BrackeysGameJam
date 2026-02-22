@@ -3,6 +3,7 @@ using UnityEngine;
 public class TileSelectionVisualizer : MonoBehaviour
 {
     [SerializeField] private InputManager inputManager;
+    [SerializeField] private TileSlideController slideController;
 
     private TileBase _selectedTile;
 
@@ -11,6 +12,9 @@ public class TileSelectionVisualizer : MonoBehaviour
         if (inputManager != null)
         {
             inputManager.OnTileSelected += HandleTileSelected;
+            inputManager.OnTileDeselected += HandleTileDeselected;
+            slideController.OnTileMoved += HandleTileMoved;
+            
             Debug.Log("[TileSelectionVisualizer] Subscribed to OnTileSelected event");
         }
         else
@@ -24,8 +28,19 @@ public class TileSelectionVisualizer : MonoBehaviour
         if (inputManager != null)
         {
             inputManager.OnTileSelected -= HandleTileSelected;
+            inputManager.OnTileDeselected -= HandleTileDeselected;
+            slideController.OnTileMoved -= HandleTileMoved;
         }
 
+        ClearSelection();
+    }
+
+    private void HandleTileMoved(Vector2Int _fromPosition, Vector2Int _toPosition)
+    {
+        ClearSelection();
+    }
+    private void HandleTileDeselected()
+    {
         ClearSelection();
     }
 

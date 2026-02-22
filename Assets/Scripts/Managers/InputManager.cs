@@ -14,6 +14,9 @@ public class InputManager : MonoBehaviour
     public delegate void TileSelectedHandler(Vector2Int tilePosition, GameObject tileObject);
     public event TileSelectedHandler OnTileSelected;
 
+    public delegate void TileDeselectedHandler();
+    public event TileDeselectedHandler OnTileDeselected;
+
     private Vector2 _mouseDownPosition;
     private Vector2 _currentMousePosition;
     private bool _isMouseDown = false;
@@ -59,7 +62,12 @@ public class InputManager : MonoBehaviour
             _currentMousePosition = _mouseDownPosition;
             _isMouseDown = true;
 
-            RaycastTile(_mouseDownPosition, out _clickedTile, out _clickedTileGridPosition);
+            if (RaycastTile(_mouseDownPosition, out _clickedTile, out _clickedTileGridPosition))
+            {
+                _lastSelectedTilePosition = _clickedTileGridPosition;
+                OnTileSelected?.Invoke(_clickedTileGridPosition, _clickedTile);
+                Debug.Log($"[InputManager] === MOUSE DOWN SELECTION === Tile: {_clickedTile?.name} at {_clickedTileGridPosition}");
+            }
         }
 
         if (_isMouseDown)
@@ -106,10 +114,8 @@ public class InputManager : MonoBehaviour
     private void HandleClick()
     {
         Debug.Log($"[InputManager] === CLICK DETECTED === Tile: {_clickedTile?.name} at {_clickedTileGridPosition}");
-        _lastSelectedTilePosition = _clickedTileGridPosition;
-        OnTileSelected?.Invoke(_clickedTileGridPosition, _clickedTile);
+        CancelSelection();
     }
-
     private void HandleDrag(Vector2 dragDelta)
     {
         Debug.Log($"[InputManager] === DRAG DETECTED === Tile: {_clickedTile?.name} at {_clickedTileGridPosition}");
@@ -129,13 +135,14 @@ public class InputManager : MonoBehaviour
         {
             Debug.Log($"[InputManager] Tile already selected, skipping selection event");
         }
-        
+
         Vector2Int gridDirection = ScreenDragToIsometricDirection(dragDelta);
         Debug.Log($"[InputManager] Grid direction calculated: {gridDirection}");
 
         if (gridDirection == Vector2Int.zero)
         {
             Debug.Log($"[InputManager] Grid direction is zero, aborting slide");
+            CancelSelection();
             return;
         }
 
@@ -145,6 +152,7 @@ public class InputManager : MonoBehaviour
         if (!slideSuccess)
         {
             Debug.Log($"[InputManager] Cannot slide tile {_clickedTileGridPosition} in direction {gridDirection}");
+            CancelSelection();
         }
         else
         {
@@ -212,5 +220,12 @@ public class InputManager : MonoBehaviour
         }
 
         return false;
+    }
+
+    private void CancelSelection()
+    {
+        _lastSelectedTilePosition = new Vector2Int(-1, -1);
+        OnTileDeselected?.Invoke();
+        Debug.Log($"[InputManager] === SELECTION CANCELLED ===");
     }
 }
