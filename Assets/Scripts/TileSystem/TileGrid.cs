@@ -156,8 +156,8 @@ public class TileGrid : MonoBehaviour
     {
         if (tileData.material != null)
         {
-            MeshRenderer[] renderers = tileObject.GetComponentsInChildren<MeshRenderer>();
-            foreach (MeshRenderer renderer in renderers)
+            MeshRenderer renderer = tileObject.GetComponent<MeshRenderer>();
+            if (renderer != null)
             {
                 renderer.sharedMaterial = tileData.material;
             }
