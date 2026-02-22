@@ -7,7 +7,7 @@ public class TileData : ScriptableObject
     public TileType tileType;
     public bool isLocked;
     public bool isWalkable = true;
-    public bool isNotJumpable = false;
+    public bool isJumpable = true;
     public GameObject prefab;
 
     [Header("Visual")]
