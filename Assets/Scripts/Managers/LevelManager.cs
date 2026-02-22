@@ -173,14 +173,15 @@ public class LevelManager : MonoBehaviour
         LoadLevel(_currentLevelIndex);
     }
 
-    public void LoadNextLevel()
+    public bool LoadNextLevel()
     {
         if (!HasNextLevel)
         {
             Debug.LogWarning("[LevelManager] No next level available!");
-            return;
+            return false;
         }
         LoadLevel(_currentLevelIndex + 1);
+        return true;
     }
 
     public void LoadPreviousLevel()

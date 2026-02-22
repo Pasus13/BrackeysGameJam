@@ -244,12 +244,13 @@ public class GameUIManager : MonoBehaviour
         Debug.Log("[GameUIManager] Next button clicked");
         
         HideWinPanel();
-        
+
+        bool nextLevelLoaded = false;
         if (LevelManager.Instance != null)
         {
             if (LevelManager.Instance.HasNextLevel)
             {
-                LevelManager.Instance.LoadNextLevel();
+                nextLevelLoaded = LevelManager.Instance.LoadNextLevel();
             }
             else
             {
@@ -258,7 +259,7 @@ public class GameUIManager : MonoBehaviour
             }
         }
         
-        if (GameStateMachine.Instance != null)
+        if (GameStateMachine.Instance != null && nextLevelLoaded)
         {
             GameStateMachine.Instance.TransitionTo<State_Setup>();
         }
