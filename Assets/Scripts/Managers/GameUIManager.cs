@@ -9,6 +9,7 @@ public class GameUIManager : MonoBehaviour
     [SerializeField] private GameObject winPanel;
     [SerializeField] private GameObject failPanel;
     [SerializeField] private GameObject gameMenuPanel;
+    [SerializeField] private GameObject creditsPanel;
 
     [Header("Win Panel Buttons")]
     [SerializeField] private Button nextButton;
@@ -23,6 +24,9 @@ public class GameUIManager : MonoBehaviour
     [SerializeField] private Button resumeButton;
     [SerializeField] private Button retryButtonGameMenu;
     [SerializeField] private Button mainMenuButtonGameMenu;
+
+    [Header("Credits Panel Buttons")]
+    [SerializeField] private Button mainMenuButtonCredits;
 
     private Button _playButtonComponent;
     private bool _isPlayButtonEnabled = true;
@@ -84,6 +88,9 @@ public class GameUIManager : MonoBehaviour
             retryButtonGameMenu.onClick.AddListener(OnRetryButtonClicked);
         if (mainMenuButtonGameMenu != null)
             mainMenuButtonGameMenu.onClick.AddListener(OnMainMenuButtonClicked);
+
+        if (mainMenuButtonCredits != null)
+            mainMenuButtonCredits.onClick.AddListener(OnMainMenuButtonClicked);
     }
 
     private void DisconnectPanelButtons()
@@ -106,6 +113,9 @@ public class GameUIManager : MonoBehaviour
             retryButtonGameMenu.onClick.RemoveListener(OnRetryButtonClicked);
         if (mainMenuButtonGameMenu != null)
             mainMenuButtonGameMenu.onClick.RemoveListener(OnMainMenuButtonClicked);
+
+        if (mainMenuButtonCredits != null)
+            mainMenuButtonCredits.onClick.RemoveListener(OnMainMenuButtonClicked);
     }
 
     public void OnPlayButtonClicked()
@@ -158,12 +168,22 @@ public class GameUIManager : MonoBehaviour
         }
     }
 
+    public void ShowCreditsPanel()
+    {
+        creditsPanel.SetActive(true);
+    }
+
+    public void HideCreditsPanel()
+    {
+        creditsPanel.SetActive(false);
+    }
+
     public void ShowWinPanel()
     {
         if (winPanel != null)
         {
             winPanel.SetActive(true);
-            Debug.Log("[GameUIManager] Win panel shown");
+            // Debug.Log("[GameUIManager] Win panel shown");
         }
     }
 
@@ -180,7 +200,7 @@ public class GameUIManager : MonoBehaviour
         if (failPanel != null)
         {
             failPanel.SetActive(true);
-            Debug.Log("[GameUIManager] Fail panel shown");
+            // Debug.Log("[GameUIManager] Fail panel shown");
         }
     }
 
@@ -224,21 +244,22 @@ public class GameUIManager : MonoBehaviour
         Debug.Log("[GameUIManager] Next button clicked");
         
         HideWinPanel();
-        
+
+        bool nextLevelLoaded = false;
         if (LevelManager.Instance != null)
         {
             if (LevelManager.Instance.HasNextLevel)
             {
-                LevelManager.Instance.LoadNextLevel();
+                nextLevelLoaded = LevelManager.Instance.LoadNextLevel();
             }
             else
             {
-                Debug.Log("[GameUIManager] No more levels! Restarting from first level.");
-                LevelManager.Instance.LoadLevel(0);
+                Debug.Log("[GameUIManager] No more levels!");
+                ShowCreditsPanel();
             }
         }
         
-        if (GameStateMachine.Instance != null)
+        if (GameStateMachine.Instance != null && nextLevelLoaded)
         {
             GameStateMachine.Instance.TransitionTo<State_Setup>();
         }
@@ -288,5 +309,6 @@ public class GameUIManager : MonoBehaviour
         HideWinPanel();
         HideFailPanel();
         HideGameMenu();
+        HideCreditsPanel();
     }
 }
