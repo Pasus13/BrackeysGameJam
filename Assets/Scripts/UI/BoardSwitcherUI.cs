@@ -2,12 +2,13 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-public class BoardSwitcherUI : MonoBehaviour
+public class HudUI : MonoBehaviour
 {
     [Header("UI References")]
     [SerializeField] private Button previousButton;
     [SerializeField] private Button nextButton;
     [SerializeField] private TextMeshProUGUI boardInfoText;
+    [SerializeField] private TextMeshProUGUI levelCounterText;
 
     [Header("Settings")]
     [SerializeField] private bool startHidden = false;
@@ -17,6 +18,11 @@ public class BoardSwitcherUI : MonoBehaviour
         if (BoardManager.Instance != null)
         {
             BoardManager.Instance.OnBoardChanged += OnBoardChanged;
+        }
+
+        if (LevelManager.Instance != null)
+        {
+            LevelManager.Instance.OnLevelLoaded += OnLevelLoaded;
         }
 
         if (startHidden)
@@ -35,13 +41,18 @@ public class BoardSwitcherUI : MonoBehaviour
         {
             BoardManager.Instance.OnBoardChanged -= OnBoardChanged;
         }
+
+        if (LevelManager.Instance != null)
+        {
+            LevelManager.Instance.OnLevelLoaded -= OnLevelLoaded;
+        }
     }
 
     public void OnPreviousButtonClicked()
     {
         if (PauseManager.Instance != null && PauseManager.Instance.IsPaused)
         {
-            Debug.Log("[BoardSwitcherUI] Cannot switch board while paused");
+            Debug.Log("[HudUI] Cannot switch board while paused");
             return;
         }
 
@@ -55,7 +66,7 @@ public class BoardSwitcherUI : MonoBehaviour
     {
         if (PauseManager.Instance != null && PauseManager.Instance.IsPaused)
         {
-            Debug.Log("[BoardSwitcherUI] Cannot switch board while paused");
+            Debug.Log("[HudUI] Cannot switch board while paused");
             return;
         }
 
@@ -83,6 +94,7 @@ public class BoardSwitcherUI : MonoBehaviour
 
         UpdateButtonStates();
         UpdateBoardInfo();
+        UpdateLevelCounter();
     }
 
     private void UpdateButtonStates()
@@ -123,6 +135,27 @@ public class BoardSwitcherUI : MonoBehaviour
         {
             boardInfoText.text = $"Board {currentIndex + 1}/{totalBoards}";
         }
+    }
+
+    private void OnLevelLoaded(int levelIndex)
+    {
+        UpdateLevelCounter();
+    }
+
+    private void UpdateLevelCounter()
+    {
+        if (levelCounterText == null) return;
+
+        if (LevelManager.Instance == null)
+        {
+            levelCounterText.text = "Level: --/--";
+            return;
+        }
+
+        int currentLevel = LevelManager.Instance.CurrentLevelIndex + 1;
+        int totalLevels = LevelManager.Instance.TotalLevels;
+
+        levelCounterText.text = $"Level: {currentLevel}/{totalLevels}";
     }
 
     public void Show()

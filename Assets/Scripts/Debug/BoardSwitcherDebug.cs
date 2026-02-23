@@ -5,7 +5,7 @@ using TMPro;
 public class BoardSwitcherDebug : MonoBehaviour
 {
     [Header("Check Status")]
-    [SerializeField] private BoardSwitcherUI boardSwitcherUI;
+    [SerializeField] private HudUI hudUI;
     [SerializeField] private Button previousButton;
     [SerializeField] private Button nextButton;
     [SerializeField] private TextMeshProUGUI boardInfoText;
@@ -26,12 +26,12 @@ public class BoardSwitcherDebug : MonoBehaviour
     {
         Debug.Log("=== BOARD SWITCHER DIAGNOSTICS ===");
 
-        if (boardSwitcherUI == null)
+        if (hudUI == null)
         {
-            boardSwitcherUI = GetComponent<BoardSwitcherUI>();
+            hudUI = GetComponent<HudUI>();
         }
 
-        Debug.Log($"BoardSwitcherUI Component: {(boardSwitcherUI != null ? "✓ Found" : "✗ Missing")}");
+        Debug.Log($"HudUI Component: {(hudUI != null ? "✓ Found" : "✗ Missing")}");
         Debug.Log($"This GameObject Active: {gameObject.activeInHierarchy}");
         Debug.Log($"This GameObject ActiveSelf: {gameObject.activeSelf}");
 

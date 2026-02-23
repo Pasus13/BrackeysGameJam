@@ -3,7 +3,7 @@ using UnityEngine;
 public class BoardSwitcherStateController : MonoBehaviour
 {
     [Header("UI Reference")]
-    [SerializeField] private BoardSwitcherUI boardSwitcherUI;
+    [SerializeField] private HudUI hudUI;
 
     private void Start()
     {
@@ -17,9 +17,9 @@ public class BoardSwitcherStateController : MonoBehaviour
             PauseManager.Instance.OnPauseStateChanged += OnPauseStateChanged;
         }
 
-        if (boardSwitcherUI == null)
+        if (hudUI == null)
         {
-            boardSwitcherUI = GetComponent<BoardSwitcherUI>();
+            hudUI = GetComponent<HudUI>();
         }
 
         UpdateVisibility();
@@ -50,7 +50,7 @@ public class BoardSwitcherStateController : MonoBehaviour
 
     private void UpdateVisibility()
     {
-        if (boardSwitcherUI == null || GameStateMachine.Instance == null)
+        if (hudUI == null || GameStateMachine.Instance == null)
             return;
 
         IGameState currentState = GameStateMachine.Instance.CurrentState;
@@ -60,11 +60,11 @@ public class BoardSwitcherStateController : MonoBehaviour
 
         if (shouldShow)
         {
-            boardSwitcherUI.Show();
+            hudUI.Show();
         }
         else
         {
-            boardSwitcherUI.Hide();
+            hudUI.Hide();
         }
     }
 }
