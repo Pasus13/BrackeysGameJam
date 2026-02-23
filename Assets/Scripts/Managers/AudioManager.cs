@@ -12,6 +12,15 @@ public class AudioManager : MonoBehaviour
     [Header("SFX Settings")]
     [SerializeField][Range(0f, 1f)] private float sfxVolume = 1f;
 
+    [Header("SFX Clips")]
+    [SerializeField] private AudioClip buttonClickSFX;
+    [SerializeField] private AudioClip tileSlideSFX;
+    [SerializeField] private AudioClip walkingSFX;
+    [SerializeField] private AudioClip jumpingSFX;
+    [SerializeField] private AudioClip failLevelSFX;
+    [SerializeField] private AudioClip passLevelSFX;
+    [SerializeField] private AudioClip victoryFanfarriaSFX;
+
     private AudioSource musicSource;
     private AudioSource sfxSource;
 
@@ -149,4 +158,39 @@ public class AudioManager : MonoBehaviour
     public bool IsMusicPlaying => musicSource != null && musicSource.isPlaying;
     public float MusicVolume => musicVolume;
     public float SFXVolume => sfxVolume;
+
+    public void PlayButtonClick()
+    {
+        PlaySFX(buttonClickSFX);
+    }
+
+    public void PlayTileSlide()
+    {
+        PlaySFX(tileSlideSFX);
+    }
+
+    public void PlayWalking()
+    {
+        PlaySFX(walkingSFX);
+    }
+
+    public void PlayJumping()
+    {
+        PlaySFX(jumpingSFX);
+    }
+
+    public void PlayFailLevel()
+    {
+        PlaySFX(failLevelSFX);
+    }
+
+    public void PlayPassLevel()
+    {
+        PlaySFX(passLevelSFX);
+    }
+
+    public void PlayVictoryFanfarria()
+    {
+        PlaySFX(victoryFanfarriaSFX);
+    }
 }
