@@ -80,7 +80,7 @@ public static class TileEffectResolver
                         return TileEffectResult.Continue;
                     }
 
-                    Debug.Log($"[TileEffectResolver] Teleport triggered");
+                    Debug.Log($"[TileEffectResolver] Teleport triggered - maintaining direction {context.direction}");
 
                     if (FindTeleportPair(
                         context.tileGrid,
@@ -90,11 +90,12 @@ public static class TileEffectResolver
                         out Vector2Int exitDirection))
                     {
                         context.position = pairPosition;
-                        context.direction = exitDirection;
+                        // NOTE: Direction is maintained from origin (not changed to exitDirection)
 
                         context.visualEffect = TileEffectVisual.Teleport;
                         context.justUsedPortal = true;
 
+                        Debug.Log($"[TileEffectResolver] Teleported to {pairPosition}, kept direction {context.direction}");
                         return TileEffectResult.Continue;
                     }
 

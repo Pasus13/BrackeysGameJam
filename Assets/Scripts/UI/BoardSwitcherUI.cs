@@ -14,16 +14,6 @@ public class BoardSwitcherUI : MonoBehaviour
 
     private void Start()
     {
-        if (previousButton != null)
-        {
-            previousButton.onClick.AddListener(OnPreviousButtonClicked);
-        }
-
-        if (nextButton != null)
-        {
-            nextButton.onClick.AddListener(OnNextButtonClicked);
-        }
-
         if (BoardManager.Instance != null)
         {
             BoardManager.Instance.OnBoardChanged += OnBoardChanged;
@@ -41,23 +31,13 @@ public class BoardSwitcherUI : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (previousButton != null)
-        {
-            previousButton.onClick.RemoveListener(OnPreviousButtonClicked);
-        }
-
-        if (nextButton != null)
-        {
-            nextButton.onClick.RemoveListener(OnNextButtonClicked);
-        }
-
         if (BoardManager.Instance != null)
         {
             BoardManager.Instance.OnBoardChanged -= OnBoardChanged;
         }
     }
 
-    private void OnPreviousButtonClicked()
+    public void OnPreviousButtonClicked()
     {
         if (PauseManager.Instance != null && PauseManager.Instance.IsPaused)
         {
@@ -71,7 +51,7 @@ public class BoardSwitcherUI : MonoBehaviour
         }
     }
 
-    private void OnNextButtonClicked()
+    public void OnNextButtonClicked()
     {
         if (PauseManager.Instance != null && PauseManager.Instance.IsPaused)
         {

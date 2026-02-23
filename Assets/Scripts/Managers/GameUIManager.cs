@@ -31,92 +31,6 @@ public class GameUIManager : MonoBehaviour
     private Button _playButtonComponent;
     private bool _isPlayButtonEnabled = true;
 
-    private void Start()
-    {
-        if (playButton != null)
-        {
-            _playButtonComponent = playButton.GetComponent<Button>();
-            if (_playButtonComponent != null)
-            {
-                _playButtonComponent.onClick.AddListener(OnPlayButtonClicked);
-                Debug.Log("[GameUIManager] Play button connected successfully");
-            }
-            else
-            {
-                Debug.LogError("[GameUIManager] PlayButton does not have a Button component!");
-            }
-        }
-        else
-        {
-            Debug.LogError("[GameUIManager] PlayButton GameObject is not assigned!");
-        }
-
-        ConnectPanelButtons();
-    }
-
-    private void OnDestroy()
-    {
-        if (playButton != null)
-        {
-            Button button = playButton.GetComponent<Button>();
-            if (button != null)
-            {
-                button.onClick.RemoveListener(OnPlayButtonClicked);
-            }
-        }
-
-        DisconnectPanelButtons();
-    }
-
-    private void ConnectPanelButtons()
-    {
-        if (nextButton != null)
-            nextButton.onClick.AddListener(OnNextButtonClicked);
-        if (retryButtonWin != null)
-            retryButtonWin.onClick.AddListener(OnRetryButtonClicked);
-        if (mainMenuButtonWin != null)
-            mainMenuButtonWin.onClick.AddListener(OnMainMenuButtonClicked);
-
-        if (retryButtonFail != null)
-            retryButtonFail.onClick.AddListener(OnRetryButtonClicked);
-        if (mainMenuButtonFail != null)
-            mainMenuButtonFail.onClick.AddListener(OnMainMenuButtonClicked);
-
-        if (resumeButton != null)
-            resumeButton.onClick.AddListener(OnResumeButtonClicked);
-        if (retryButtonGameMenu != null)
-            retryButtonGameMenu.onClick.AddListener(OnRetryButtonClicked);
-        if (mainMenuButtonGameMenu != null)
-            mainMenuButtonGameMenu.onClick.AddListener(OnMainMenuButtonClicked);
-
-        if (mainMenuButtonCredits != null)
-            mainMenuButtonCredits.onClick.AddListener(OnMainMenuButtonClicked);
-    }
-
-    private void DisconnectPanelButtons()
-    {
-        if (nextButton != null)
-            nextButton.onClick.RemoveListener(OnNextButtonClicked);
-        if (retryButtonWin != null)
-            retryButtonWin.onClick.RemoveListener(OnRetryButtonClicked);
-        if (mainMenuButtonWin != null)
-            mainMenuButtonWin.onClick.RemoveListener(OnMainMenuButtonClicked);
-
-        if (retryButtonFail != null)
-            retryButtonFail.onClick.RemoveListener(OnRetryButtonClicked);
-        if (mainMenuButtonFail != null)
-            mainMenuButtonFail.onClick.RemoveListener(OnMainMenuButtonClicked);
-
-        if (resumeButton != null)
-            resumeButton.onClick.RemoveListener(OnResumeButtonClicked);
-        if (retryButtonGameMenu != null)
-            retryButtonGameMenu.onClick.RemoveListener(OnRetryButtonClicked);
-        if (mainMenuButtonGameMenu != null)
-            mainMenuButtonGameMenu.onClick.RemoveListener(OnMainMenuButtonClicked);
-
-        if (mainMenuButtonCredits != null)
-            mainMenuButtonCredits.onClick.RemoveListener(OnMainMenuButtonClicked);
-    }
 
     public void OnPlayButtonClicked()
     {
@@ -229,7 +143,7 @@ public class GameUIManager : MonoBehaviour
         }
     }
 
-    private void OnResumeButtonClicked()
+    public void OnResumeButtonClicked()
     {
         Debug.Log("[GameUIManager] Resume button clicked");
         
@@ -239,7 +153,8 @@ public class GameUIManager : MonoBehaviour
         }
     }
 
-    private void OnNextButtonClicked()
+
+    public void OnNextButtonClicked()
     {
         Debug.Log("[GameUIManager] Next button clicked");
         
@@ -265,7 +180,7 @@ public class GameUIManager : MonoBehaviour
         }
     }
 
-    private void OnRetryButtonClicked()
+    public void OnRetryButtonClicked()
     {
         Debug.Log("[GameUIManager] Retry button clicked");
         
@@ -289,7 +204,7 @@ public class GameUIManager : MonoBehaviour
         }
     }
 
-    private void OnMainMenuButtonClicked()
+    public void OnMainMenuButtonClicked()
     {
         Debug.Log("[GameUIManager] Main Menu button clicked - Loading Main Menu");
         
