@@ -256,6 +256,11 @@ public class CharacterMover : MonoBehaviour
     Transform movingTransform,
     Vector2Int targetGridPos)
     {
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayWalking();
+        }
+
         Vector3 startPos = movingTransform.position;
 
         Vector3 targetPos =
@@ -282,6 +287,11 @@ public class CharacterMover : MonoBehaviour
     Transform movingTransform,
     Vector2Int targetGridPos)
     {
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayJumping();
+        }
+
         Vector3 startPos = movingTransform.position;
 
         Vector3 targetPos =
@@ -313,6 +323,11 @@ public class CharacterMover : MonoBehaviour
     Transform movingTransform,
     Vector2Int targetGridPos)
     {
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayPortalEnter();
+        }
+
         Vector3 originalScale = movingTransform.localScale;
         Vector3 shrinkScale = Vector3.zero;
 

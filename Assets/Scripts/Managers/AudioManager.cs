@@ -17,6 +17,7 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private AudioClip tileSlideSFX;
     [SerializeField] private AudioClip walkingSFX;
     [SerializeField] private AudioClip jumpingSFX;
+    [SerializeField] private AudioClip portalEnterSFX;
     [SerializeField] private AudioClip failLevelSFX;
     [SerializeField] private AudioClip passLevelSFX;
     [SerializeField] private AudioClip victoryFanfarriaSFX;
@@ -177,6 +178,11 @@ public class AudioManager : MonoBehaviour
     public void PlayJumping()
     {
         PlaySFX(jumpingSFX);
+    }
+
+    public void PlayPortalEnter()
+    {
+        PlaySFX(portalEnterSFX);
     }
 
     public void PlayFailLevel()

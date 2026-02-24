@@ -71,12 +71,22 @@ public class MainMenuController : MonoBehaviour
 
     public void OnStartClicked()
     {
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayButtonClick();
+        }
+
         Debug.Log("[MainMenuController] Start button clicked - Loading game scene");
         SceneManager.LoadScene(gameSceneName);
     }
 
     public void OnCreditsClicked()
     {
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayButtonClick();
+        }
+
         Debug.Log("[MainMenuController] Credits button clicked");
         if (creditsPanel != null)
         {
@@ -86,6 +96,11 @@ public class MainMenuController : MonoBehaviour
 
     public void OnCreditsCloseClicked()
     {
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayButtonClick();
+        }
+
         Debug.Log("[MainMenuController] Credits close button clicked");
         if (creditsPanel != null)
         {
@@ -95,6 +110,11 @@ public class MainMenuController : MonoBehaviour
 
     public void OnQuitClicked()
     {
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayButtonClick();
+        }
+
         Debug.Log("[MainMenuController] Quit button clicked - Exiting application");
 
         #if UNITY_EDITOR

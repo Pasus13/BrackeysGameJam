@@ -56,6 +56,11 @@ public class HudUI : MonoBehaviour
             return;
         }
 
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayButtonClick();
+        }
+
         if (BoardManager.Instance != null)
         {
             BoardManager.Instance.SwitchToPreviousBoard();
@@ -68,6 +73,11 @@ public class HudUI : MonoBehaviour
         {
             Debug.Log("[HudUI] Cannot switch board while paused");
             return;
+        }
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayButtonClick();
         }
 
         if (BoardManager.Instance != null)

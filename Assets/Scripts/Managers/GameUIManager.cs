@@ -39,6 +39,11 @@ public class GameUIManager : MonoBehaviour
             return;
         }
 
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayButtonClick();
+        }
+
         _isPlayButtonEnabled = false;
         
         if (_playButtonComponent != null)
@@ -84,6 +89,11 @@ public class GameUIManager : MonoBehaviour
 
     public void ShowCreditsPanel()
     {
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayVictoryFanfarria();
+        }
+
         creditsPanel.SetActive(true);
     }
 
@@ -94,10 +104,14 @@ public class GameUIManager : MonoBehaviour
 
     public void ShowWinPanel()
     {
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayPassLevel();
+        }
+
         if (winPanel != null)
         {
             winPanel.SetActive(true);
-            // Debug.Log("[GameUIManager] Win panel shown");
         }
     }
 
@@ -111,10 +125,14 @@ public class GameUIManager : MonoBehaviour
 
     public void ShowFailPanel()
     {
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayFailLevel();
+        }
+
         if (failPanel != null)
         {
             failPanel.SetActive(true);
-            // Debug.Log("[GameUIManager] Fail panel shown");
         }
     }
 
@@ -145,6 +163,11 @@ public class GameUIManager : MonoBehaviour
 
     public void OnResumeButtonClicked()
     {
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayButtonClick();
+        }
+
         Debug.Log("[GameUIManager] Resume button clicked");
         
         if (PauseManager.Instance != null)
@@ -156,6 +179,11 @@ public class GameUIManager : MonoBehaviour
 
     public void OnNextButtonClicked()
     {
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayButtonClick();
+        }
+
         Debug.Log("[GameUIManager] Next button clicked");
         
         HideWinPanel();
@@ -204,6 +232,11 @@ public class GameUIManager : MonoBehaviour
 
     public void OnRetryButtonClicked()
     {
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayButtonClick();
+        }
+
         Debug.Log("[GameUIManager] Retry button clicked");
         
         if (PauseManager.Instance != null)
@@ -228,6 +261,11 @@ public class GameUIManager : MonoBehaviour
 
     public void OnMainMenuButtonClicked()
     {
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayButtonClick();
+        }
+
         Debug.Log("[GameUIManager] Main Menu button clicked - Loading Main Menu");
         
         if (PauseManager.Instance != null)

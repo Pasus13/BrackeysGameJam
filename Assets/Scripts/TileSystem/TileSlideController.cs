@@ -180,6 +180,11 @@ public class TileSlideController : MonoBehaviour
     {
         _isAnimating = true;
 
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayTileSlide();
+        }
+
         if (ActiveTileGrid == null) { _isAnimating = false; yield break; }
 
         GameObject movingTile = ActiveTileGrid.GetTile(fromPosition);
