@@ -180,6 +180,28 @@ public class GameUIManager : MonoBehaviour
         }
     }
 
+    public void onResetButtonClicked()
+    {
+        Debug.Log("[GameUIManager] Retry button clicked");
+
+        if (PauseManager.Instance != null)
+        {
+            PauseManager.Instance.ForceResume();
+        }
+        HideAllUI();
+        ShowGameMenu();
+        if (LevelManager.Instance != null)
+        {
+            LevelManager.Instance.LoadLevel(0);
+        }
+
+        if (GameStateMachine.Instance != null)
+        {
+            GameStateMachine.Instance.TransitionTo<State_Setup>();
+        }
+        
+    }
+
     public void OnRetryButtonClicked()
     {
         Debug.Log("[GameUIManager] Retry button clicked");
