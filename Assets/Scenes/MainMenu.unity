@@ -1543,10 +1543,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0896b841ef8fc2d4d8dcfc70684a349a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AudioManager
-  backgroundMusic: {fileID: 0}
+  backgroundMusic: {fileID: 8300000, guid: 11e72bb14126a4c4bba7a4f8e1f61a5e, type: 3}
   musicVolume: 0.5
   playOnStart: 1
   sfxVolume: 1
+  buttonClickSFX: {fileID: 0}
+  tileSlideSFX: {fileID: 0}
+  walkingSFX: {fileID: 0}
+  jumpingSFX: {fileID: 0}
+  failLevelSFX: {fileID: 0}
+  passLevelSFX: {fileID: 0}
+  victoryFanfarriaSFX: {fileID: 0}
 --- !u!4 &1777974570
 Transform:
   m_ObjectHideFlags: 0
